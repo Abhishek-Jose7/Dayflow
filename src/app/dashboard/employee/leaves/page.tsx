@@ -24,17 +24,17 @@ export default function EmployeeLeaves() {
 
     const fetchLeaves = async () => {
         const stored = localStorage.getItem('currentUser');
-        if (stored) {
-            const user = JSON.parse(stored);
-            try {
-                const res = await fetch(`/api/leaves?email=${encodeURIComponent(user.email)}`);
-                const data = await res.json();
-                if (data.success) {
-                    setLeaves(data.data);
-                }
-            } catch (err) {
-                console.error('Failed to load leaves');
+        // Default to seeded user 'sarah@dayflow.com' if no user is logged in (FOR DEMO/TESTING)
+        const user = stored ? JSON.parse(stored) : { email: 'sarah@dayflow.com' };
+
+        try {
+            const res = await fetch(`/api/leaves?email=${encodeURIComponent(user.email)}`);
+            const data = await res.json();
+            if (data.success) {
+                setLeaves(data.data);
             }
+        } catch (err) {
+            console.error('Failed to load leaves');
         }
     };
 
@@ -43,8 +43,8 @@ export default function EmployeeLeaves() {
         setIsLoading(true);
 
         const stored = localStorage.getItem('currentUser');
-        if (!stored) return;
-        const user = JSON.parse(stored);
+        // Default to seeded user 'sarah@dayflow.com' if no user is logged in (FOR DEMO/TESTING)
+        const user = stored ? JSON.parse(stored) : { email: 'sarah@dayflow.com' };
 
         try {
             const res = await fetch('/api/leaves', {

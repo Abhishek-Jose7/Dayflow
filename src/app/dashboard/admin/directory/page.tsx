@@ -16,9 +16,11 @@ export default function AdminDirectory() {
         <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '1.75rem' }}>Employee Directory</h1>
-                <Button style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Plus size={16} /> Add Employee
-                </Button>
+                <Link href="/dashboard/admin/directory/new">
+                    <Button style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Plus size={16} /> Add Employee
+                    </Button>
+                </Link>
             </div>
 
             <div style={{ marginBottom: '2rem' }}>
