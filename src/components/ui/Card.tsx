@@ -7,9 +7,10 @@ interface CardProps {
     padding?: string;
     interactive?: boolean;
     glass?: boolean;
+    style?: React.CSSProperties;
 }
 
-export function Card({ children, className, title, padding = '1.5rem', interactive, glass }: CardProps) {
+export function Card({ children, className, title, padding = '1.5rem', interactive, glass, style }: CardProps) {
     const baseClasses = `card ${glass ? 'glass' : ''} ${interactive ? 'hover-lift' : ''} ${className || ''}`;
 
     return (
@@ -18,7 +19,8 @@ export function Card({ children, className, title, padding = '1.5rem', interacti
             style={{
                 padding,
                 cursor: interactive ? 'pointer' : undefined,
-                border: glass ? undefined : '1px solid var(--border-light)'
+                border: glass ? undefined : '1px solid var(--border-light)',
+                ...style
             }}
         >
             {title && (

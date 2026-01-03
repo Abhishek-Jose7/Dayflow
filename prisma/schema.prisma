@@ -57,6 +57,33 @@ model EmployeeProfile {
   managerId     String?
   manager       EmployeeProfile? @relation("ManagerScale", fields: [managerId], references: [id])
   directReports EmployeeProfile[] @relation("ManagerScale")
+
+  // Resume/Skills fields
+  about         String?
+  skills        String? // Comma separated for SQLite simplicity in prototype
+
+  salaryConfig  SalaryConfig?
+}
+
+model SalaryConfig {
+  id              String          @id @default(uuid())
+  employeeProfileId String        @unique
+  employeeProfile EmployeeProfile @relation(fields: [employeeProfileId], references: [id])
+
+  monthlyWage     Float           @default(0)
+  
+  // Rates (Percentage of Monthly Wage usually)
+  basicRate       Float           @default(0.5)   // 50%
+  hraRate         Float           @default(0.5)   // 50% of Basic usually, but keeping simple for first pass
+  standardAllowance Float         @default(4167)  // Fixed
+  performanceBonusRate Float      @default(0.0833) // ~8.33%
+  ltaRate         Float           @default(0.0833) // ~8.33%
+  
+  // Deductions
+  pfRate          Float           @default(0.12)
+  professionalTax Float           @default(200)
+
+  updatedAt       DateTime        @updatedAt
 }
 
 model Department {
@@ -74,6 +101,7 @@ model Attendance {
   checkOut    DateTime?
   status      String           // PRESENT, ABSENT, etc.
   workHours   Float?
+  extraHours  Float?           // Added for wireframe compliance
   
   createdAt   DateTime         @default(now())
 

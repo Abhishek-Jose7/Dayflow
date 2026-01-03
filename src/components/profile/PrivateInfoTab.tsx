@@ -17,27 +17,20 @@ interface PrivateInfoProps {
 }
 
 export function PrivateInfoTab({ details }: PrivateInfoProps) {
-    // Mock Bank Details based on index to vary them slightly
-    const banks = [
-        { acc: '123456789012', name: 'HDFC Bank', ifsc: 'HDFC0001234', pan: 'ABCDE1234F', uan: '100200300400' },
-        { acc: '987654321098', name: 'ICICI Bank', ifsc: 'ICIC0005678', pan: 'FGHIJ5678K', uan: '100200300401' },
-        { acc: '456123789056', name: 'SBI', ifsc: 'SBIN0009012', pan: 'KLMNO9012P', uan: '100200300402' },
-        { acc: '789456123012', name: 'Axis Bank', ifsc: 'UTIB0003456', pan: 'QRSTU3456V', uan: '100200300403' },
-    ];
-    const bank = banks[details.bankIndex] || banks[0];
+    // Bank details should ideally come from the API, for now we set them to empty if index is 0
+    const bank = { acc: '--', name: '--', ifsc: '--', pan: '--', uan: '--' };
 
     return (
         <Card title="Private Information" padding="2rem">
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '4rem' }}>
                 {/* Personal Info Left Column */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    <ProfileField label="Date of Birth" type="date" value={details.dob} readOnly />
-                    <ProfileField label="Residing Address" value={details.address} readOnly />
-                    <ProfileField label="Nationality" value={details.nationality} readOnly />
-                    <ProfileField label="Personal Email" value={details.personalEmail} readOnly />
-                    <ProfileField label="Gender" value={details.gender} readOnly />
-                    <ProfileField label="Marital Status" value={details.maritalStatus} readOnly />
-                    <ProfileField label="Date of Joining" value="2022-03-15" readOnly />
+                    <ProfileField label="Date of Birth" type="date" value={details.dob || ''} readOnly />
+                    <ProfileField label="Residing Address" value={details.address || '--'} readOnly />
+                    <ProfileField label="Nationality" value={details.nationality || '--'} readOnly />
+                    <ProfileField label="Personal Email" value={details.personalEmail || '--'} readOnly />
+                    <ProfileField label="Gender" value={details.gender || '--'} readOnly />
+                    <ProfileField label="Marital Status" value={details.maritalStatus || '--'} readOnly />
                 </div>
 
                 {/* Bank Info Right Column */}
@@ -51,7 +44,6 @@ export function PrivateInfoTab({ details }: PrivateInfoProps) {
                     <ProfileField label="IFSC Code" value={bank.ifsc} readOnly />
                     <ProfileField label="PAN No" value={bank.pan} readOnly />
                     <ProfileField label="UAN NO" value={bank.uan} readOnly />
-                    <ProfileField label="Emp Code" value="EMP-2024-042" readOnly />
                 </div>
             </div>
         </Card>

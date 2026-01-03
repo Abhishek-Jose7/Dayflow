@@ -1,105 +1,196 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { LogIn, LogOut, Clock, Calendar } from 'lucide-react';
+import { LogIn, LogOut, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 
 export default function EmployeeAttendance() {
-    const history = [
-        { date: 'Today, Jan 03', checkIn: '09:02 AM', checkOut: '-', hours: 'On-going', status: 'Present' },
-        { date: 'Yesterday, Jan 02', checkIn: '08:58 AM', checkOut: '06:10 PM', hours: '9h 12m', status: 'Present' },
-        { date: 'Wednesday, Jan 01', checkIn: '-', checkOut: '-', hours: '-', status: 'Holiday' },
-        { date: 'Tuesday, Dec 31', checkIn: '09:15 AM', checkOut: '05:45 PM', hours: '8h 30m', status: 'Present' },
-        { date: 'Monday, Dec 30', checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9h 00m', status: 'Present' },
-    ];
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [checking, setChecking] = useState(false);
+
+    const fetchAttendance = async () => {
+        setLoading(true);
+        const stored = localStorage.getItem('currentUser');
+        if (!stored) return;
+        const user = JSON.parse(stored);
+
+        try {
+            const res = await fetch(`/api/attendance?email=${encodeURIComponent(user.email)}&month=${month}&year=${year}`);
+            const result = await res.json();
+            if (result.success) {
+                setData(result.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch attendance');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAttendance();
+    }, [month, year]);
+
+    const handleAction = async (action: 'CHECK_IN' | 'CHECK_OUT') => {
+        setChecking(true);
+        const stored = localStorage.getItem('currentUser');
+        if (!stored) return;
+        const user = JSON.parse(stored);
+
+        try {
+            const res = await fetch('/api/attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, action })
+            });
+            const result = await res.json();
+            if (result.success) {
+                fetchAttendance();
+            } else {
+                alert(result.error);
+            }
+        } catch (err) {
+            alert('Operation failed');
+        } finally {
+            setChecking(false);
+        }
+    };
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    const changeMonth = (dir: number) => {
+        let newMonth = month + dir;
+        let newYear = year;
+        if (newMonth > 12) { newMonth = 1; newYear++; }
+        if (newMonth < 1) { newMonth = 12; newYear--; }
+        setMonth(newMonth);
+        setYear(newYear);
+    };
+
+    if (loading && !data) return <div style={{ padding: '2rem' }}>Loading...</div>;
+
+    const todayRecord = data?.history?.find((a: any) => new Date(a.date).toDateString() === new Date().toDateString());
 
     return (
-        <div>
+        <div style={{ paddingBottom: '3rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.75rem' }}>My Attendance</h1>
-                <div style={{ background: 'var(--bg-card)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Calendar size={18} color="var(--text-secondary)" />
-                    <span style={{ fontWeight: 500 }}>January 2026</span>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 600 }}>Attendance</h1>
+
+                {/* Check-in / Out Quick Action */}
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ textAlign: 'right', marginRight: '1rem' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Server Time</div>
+                        <div style={{ fontWeight: 700 }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                    {!todayRecord?.checkIn ? (
+                        <Button onClick={() => handleAction('CHECK_IN')} disabled={checking} style={{ display: 'flex', gap: '0.5rem' }}>
+                            <LogIn size={18} /> Check In
+                        </Button>
+                    ) : !todayRecord?.checkOut ? (
+                        <Button onClick={() => handleAction('CHECK_OUT')} disabled={checking} variant="outline" style={{ display: 'flex', gap: '0.5rem', borderColor: 'var(--danger)', color: 'var(--danger)' }}>
+                            <LogOut size={18} /> Check Out
+                        </Button>
+                    ) : (
+                        <div style={{ background: '#DEF7EC', color: '#03543F', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.875rem' }}>
+                            Today's Shift Completed
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: '2rem' }}>
+            {/* Wireframe Style Navigation & Stats Bar */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-card)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+                    <button onClick={() => changeMonth(-1)} style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-secondary)' }}><ChevronLeft size={20} /></button>
+                    <button onClick={() => changeMonth(1)} style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-secondary)' }}><ChevronRight size={20} /></button>
+                </div>
 
-                {/* Left: Calendar/History List */}
-                <Card title="Attendance History" padding="0">
+                <div style={{ background: 'var(--bg-card)', padding: '0.625rem 1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', fontWeight: 600, minWidth: '150px', textAlign: 'center' }}>
+                    {monthNames[month - 1]} {year}
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+                    <div style={{ background: 'var(--bg-card)', padding: '0.625rem 1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', flex: 1, textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Count of days present</div>
+                        <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{data?.stats?.daysPresent || 0}</div>
+                    </div>
+                    <div style={{ background: 'var(--bg-card)', padding: '0.625rem 1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', flex: 1, textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Leaves count</div>
+                        <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{data?.stats?.leaves || 0}</div>
+                    </div>
+                    <div style={{ padding: '0.625rem 1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', flex: 1, textAlign: 'center', background: 'var(--primary-light)' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '2px', fontWeight: 600 }}>Total working days</div>
+                        <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--primary)' }}>{data?.stats?.totalWorkingDays || 0}</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Attendance Table */}
+            <Card padding="0">
+                <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead style={{ background: 'var(--bg-app)', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                             <tr>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Date</th>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Check In</th>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Check Out</th>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Work Hours</th>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Status</th>
+                                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Date</th>
+                                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Check In</th>
+                                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Check Out</th>
+                                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Work Hours</th>
+                                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Extra Hours</th>
+                                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {history.map((row, i) => (
-                                <tr key={i} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                                    <td style={{ padding: '1rem', fontWeight: 500 }}>{row.date}</td>
-                                    <td style={{ padding: '1rem' }}>{row.checkIn}</td>
-                                    <td style={{ padding: '1rem' }}>{row.checkOut}</td>
-                                    <td style={{ padding: '1rem' }}>{row.hours}</td>
-                                    <td style={{ padding: '1rem' }}>
-                                        <span style={{
-                                            padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)',
-                                            fontSize: '0.75rem', fontWeight: 600,
-                                            background: row.status === 'Present' ? '#DEF7EC' : row.status === 'Holiday' ? '#EEF2FF' : '#FEF3C7',
-                                            color: row.status === 'Present' ? '#03543F' : row.status === 'Holiday' ? '#3730A3' : '#92400E',
-                                        }}>
-                                            {row.status}
-                                        </span>
+                            {data?.history?.length > 0 ? (
+                                data.history.map((row: any, i: number) => (
+                                    <tr key={i} style={{ borderBottom: '1px solid var(--border-light)', transition: 'background 0.2s' }} className="hover-row">
+                                        <td style={{ padding: '1.25rem 1.5rem', fontWeight: 500 }}>
+                                            {new Date(row.date).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })}
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1.5rem' }}>
+                                            {row.checkIn ? new Date(row.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1.5rem' }}>
+                                            {row.checkOut ? new Date(row.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600 }}>
+                                            {row.workHours ? `${row.workHours.toFixed(2)}h` : '-'}
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1.5rem', color: row.extraHours > 0 ? '#16A34A' : 'var(--text-secondary)' }}>
+                                            {row.extraHours ? `+${row.extraHours.toFixed(2)}h` : '-'}
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1.5rem' }}>
+                                            <span style={{
+                                                padding: '0.35rem 1rem', borderRadius: 'var(--radius-full)',
+                                                fontSize: '0.75rem', fontWeight: 600,
+                                                background: row.status === 'PRESENT' || row.status === 'ON-TIME' ? '#DEF7EC' : row.status === 'LATE' ? '#FEF3C7' : '#FDE8E8',
+                                                color: row.status === 'PRESENT' || row.status === 'ON-TIME' ? '#03543F' : row.status === 'LATE' ? '#92400E' : '#9B1C1C',
+                                            }}>
+                                                {row.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                        No attendance records found for this month.
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
-                </Card>
-
-                {/* Right: Actions & Summary */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <Card title="Today's Action">
-                        <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-                            <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>09:42 AM</div>
-                            <div style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Friday, Jan 03</div>
-
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                <Button disabled style={{ cursor: 'not-allowed', opacity: 0.6, display: 'flex', gap: '0.5rem' }}>
-                                    <LogIn size={18} /> Checked In
-                                </Button>
-                                <Button variant="outline" style={{ display: 'flex', gap: '0.5rem', borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-                                    <LogOut size={18} /> Check Out
-                                </Button>
-                            </div>
-                        </div>
-                    </Card>
-
-                    <Card title="Statistics">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                                    <div style={{ padding: '0.5rem', background: '#DEF7EC', borderRadius: '8px', color: '#03543F' }}><Clock size={20} /></div>
-                                    <span>On Time</span>
-                                </div>
-                                <span style={{ fontWeight: 600 }}>18 Days</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                                    <div style={{ padding: '0.5rem', background: '#FEF3C7', borderRadius: '8px', color: '#92400E' }}><Clock size={20} /></div>
-                                    <span>Late</span>
-                                </div>
-                                <span style={{ fontWeight: 600 }}>2 Days</span>
-                            </div>
-                        </div>
-                    </Card>
                 </div>
+            </Card>
 
-            </div>
+            <style jsx>{`
+                .hover-row:hover {
+                    background: var(--bg-app);
+                }
+            `}</style>
         </div>
     );
 }
