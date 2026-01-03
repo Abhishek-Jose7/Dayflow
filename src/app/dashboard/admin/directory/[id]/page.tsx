@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
@@ -9,22 +9,31 @@ import { PrivateInfoTab } from '@/components/profile/PrivateInfoTab';
 import { SalaryInfoTab } from '@/components/profile/SalaryInfoTab';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
-
-// Mock Data (In real app, fetch based on ID)
-const EMPLOYEE_DATA = {
-    name: "Sarah Wilson",
-    role: "Product Designer",
-    employeeId: "EMP-2024-089",
-    email: "sarah.wilson@dayflow.com",
-    phone: "+1 (555) 987-6543",
-    department: "Design",
-    manager: "Alex Lewis",
-    location: "New York, NY"
-};
+import { EMPLOYEES } from '@/lib/mock-data';
 
 export default function AdminEmployeeProfile() {
     const params = useParams();
-    const [activeTab, setActiveTab] = useState('Salary Info'); // Default to Salary Info for Admin as requested? Or Private. Let's default to Resume or Salary.
+    const [activeTab, setActiveTab] = useState('Salary Info');
+    const [employee, setEmployee] = useState<typeof EMPLOYEES[0] | null>(null);
+
+    useEffect(() => {
+        // Find employee by ID from params
+        if (params.id) {
+            const found = EMPLOYEES.find(e => e.id === params.id);
+            if (found) setEmployee(found);
+        }
+    }, [params.id]);
+
+    if (!employee) {
+        return (
+            <div style={{ padding: '3rem', textAlign: 'center' }}>
+                <h2>Employee Not Found</h2>
+                <Link href="/dashboard/admin/directory">
+                    <Button variant="outline" style={{ marginTop: '1rem' }}>Back to Directory</Button>
+                </Link>
+            </div>
+        )
+    }
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
@@ -34,7 +43,16 @@ export default function AdminEmployeeProfile() {
                 </Link>
             </div>
 
-            <ProfileHeader {...EMPLOYEE_DATA} />
+            <ProfileHeader
+                name={employee.name}
+                role={employee.role}
+                employeeId={`EMP-${employee.id.padStart(3, '0')}`}
+                email={employee.email}
+                phone={employee.phone}
+                department={employee.dept}
+                manager={employee.manager}
+                location={employee.location}
+            />
 
             <ProfileTabs
                 activeTab={activeTab}
@@ -43,9 +61,9 @@ export default function AdminEmployeeProfile() {
             />
 
             <div className="fade-in">
-                {activeTab === 'Resume' && <ResumeTab />}
-                {activeTab === 'Private Info' && <PrivateInfoTab />}
-                {activeTab === 'Salary Info' && <SalaryInfoTab isAdmin={true} />}
+                {activeTab === 'Resume' && <ResumeTab about={employee.about} skills={employee.skills} />}
+                {activeTab === 'Private Info' && <PrivateInfoTab details={employee.private} />}
+                {activeTab === 'Salary Info' && <SalaryInfoTab isAdmin={true} salary={employee.salary} />}
             </div>
 
             <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>

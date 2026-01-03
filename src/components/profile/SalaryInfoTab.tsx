@@ -3,11 +3,22 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 
-interface SalaryInfoTabProps {
-    isAdmin: boolean;
+interface SalaryDetails {
+    basic: string;
+    hra: string;
+    special: string;
+    bonus: string;
+    pf: string;
+    totalMonth: string;
+    totalYear: string;
 }
 
-export function SalaryInfoTab({ isAdmin }: SalaryInfoTabProps) {
+interface SalaryInfoTabProps {
+    isAdmin: boolean;
+    salary: SalaryDetails;
+}
+
+export function SalaryInfoTab({ isAdmin, salary }: SalaryInfoTabProps) {
     if (!isAdmin) {
         return (
             <Card>
@@ -28,11 +39,11 @@ export function SalaryInfoTab({ isAdmin }: SalaryInfoTabProps) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
                     <div>
                         <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Month Wage</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>₹ 50,000</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>₹ {salary.totalMonth}</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Yearly Wage</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>₹ 600,000</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>₹ {salary.totalYear}</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Working Days</div>
@@ -45,12 +56,10 @@ export function SalaryInfoTab({ isAdmin }: SalaryInfoTabProps) {
                 {/* Salary Components */}
                 <Card title="Salary Components">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <SalaryRow label="Basic Salary" value="25,000.00" percent="50.00%" desc="50% of the basic salary" />
-                        <SalaryRow label="House Rent Allowance" value="12,500.00" percent="25.00%" desc="HRA provided to employees" />
-                        <SalaryRow label="Standard Allowance" value="4,167.00" percent="8.33%" desc="Fixed amount provided to employee" />
-                        <SalaryRow label="Performance Bonus" value="2,082.50" percent="4.16%" desc="Variable amount paid during payroll" />
-                        <SalaryRow label="Leave Travel Allowance" value="2,082.50" percent="4.16%" desc="Covers travel expenses" />
-                        <SalaryRow label="Fixed Allowance" value="2,918.00" percent="5.85%" desc="Balancing figure" />
+                        <SalaryRow label="Basic Salary" value={salary.basic} percent="50.00%" desc="50% of the basic salary" />
+                        <SalaryRow label="House Rent Allowance" value={salary.hra} percent="25.00%" desc="HRA provided to employees" />
+                        <SalaryRow label="Special Allowance" value={salary.special} percent="15.00%" desc="Fixed amount provided to employee" />
+                        <SalaryRow label="Performance Bonus" value={salary.bonus} percent="5.00%" desc="Variable amount paid during payroll" />
                     </div>
                 </Card>
 
@@ -60,12 +69,12 @@ export function SalaryInfoTab({ isAdmin }: SalaryInfoTabProps) {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>
                                 <span>Employee</span>
-                                <span style={{ fontWeight: 600 }}>₹ 3,000.00</span>
+                                <span style={{ fontWeight: 600 }}>₹ {salary.pf}</span>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>12.00%</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>
                                 <span>Employer</span>
-                                <span style={{ fontWeight: 600 }}>₹ 3,000.00</span>
+                                <span style={{ fontWeight: 600 }}>₹ {salary.pf}</span>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>12.00%</span>
                             </div>
                         </div>

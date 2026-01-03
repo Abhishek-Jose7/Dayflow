@@ -3,16 +3,19 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 
-export function ResumeTab() {
+interface ResumeTabProps {
+    about: string;
+    skills: string[];
+}
+
+export function ResumeTab({ about, skills }: ResumeTabProps) {
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '2rem' }}>
             {/* Left Column: About & Interests */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <Card title="About 🖊️">
                     <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                        Experienced software engineer with a passion for building scalable web applications.
-                        Proficient in TypeScript, React, and Node.js. Dedicated to writing clean, maintainable code
-                        and collaborating with cross-functional teams to deliver high-quality software solutions.
+                        {about}
                     </p>
                 </Card>
 
@@ -36,7 +39,7 @@ export function ResumeTab() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <Card title="Skills">
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
-                        {['React', 'TypeScript', 'Node.js', 'System Design', 'UI/UX'].map(skill => (
+                        {skills.map(skill => (
                             <span key={skill} style={{
                                 background: 'var(--bg-app)', padding: '0.25rem 0.75rem',
                                 borderRadius: 'var(--radius-full)', fontSize: '0.875rem', fontWeight: 500
