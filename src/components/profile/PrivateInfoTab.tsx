@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { ProfileField } from './ProfileField';
 
 interface PrivateInfoProps {
     details: {
@@ -27,28 +27,31 @@ export function PrivateInfoTab({ details }: PrivateInfoProps) {
     const bank = banks[details.bankIndex] || banks[0];
 
     return (
-        <Card title="Private Information">
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '3rem' }}>
-                {/* Personal Info */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <Input label="Date of Birth" type="date" value={details.dob} readOnly />
-                    <Input label="Residing Address" value={details.address} readOnly />
-                    <Input label="Nationality" value={details.nationality} readOnly />
-                    <Input label="Personal Email" value={details.personalEmail} readOnly />
-                    <Input label="Gender" value={details.gender} readOnly />
-                    <Input label="Marital Status" value={details.maritalStatus} readOnly />
-                    <Input label="Date of Joining" value="2022-03-15" readOnly />
+        <Card title="Private Information" padding="2rem">
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '4rem' }}>
+                {/* Personal Info Left Column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <ProfileField label="Date of Birth" type="date" value={details.dob} readOnly />
+                    <ProfileField label="Residing Address" value={details.address} readOnly />
+                    <ProfileField label="Nationality" value={details.nationality} readOnly />
+                    <ProfileField label="Personal Email" value={details.personalEmail} readOnly />
+                    <ProfileField label="Gender" value={details.gender} readOnly />
+                    <ProfileField label="Marital Status" value={details.maritalStatus} readOnly />
+                    <ProfileField label="Date of Joining" value="2022-03-15" readOnly />
                 </div>
 
-                {/* Bank Info */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', borderBottom: '1px solid var(--border-light)' }}>Bank Details</h4>
-                    <Input label="Account Number" value={bank.acc} readOnly />
-                    <Input label="Bank Name" value={bank.name} readOnly />
-                    <Input label="IFSC Code" value={bank.ifsc} readOnly />
-                    <Input label="PAN No" value={bank.pan} readOnly />
-                    <Input label="UAN No" value={bank.uan} readOnly />
-                    <Input label="Emp Code" value="EMP-2024-042" readOnly />
+                {/* Bank Info Right Column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+                        <h4 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Bank Details</h4>
+                    </div>
+
+                    <ProfileField label="Account Number" value={bank.acc} readOnly />
+                    <ProfileField label="Bank Name" value={bank.name} readOnly />
+                    <ProfileField label="IFSC Code" value={bank.ifsc} readOnly />
+                    <ProfileField label="PAN No" value={bank.pan} readOnly />
+                    <ProfileField label="UAN NO" value={bank.uan} readOnly />
+                    <ProfileField label="Emp Code" value="EMP-2024-042" readOnly />
                 </div>
             </div>
         </Card>

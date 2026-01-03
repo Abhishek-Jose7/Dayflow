@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
@@ -5,6 +7,7 @@ import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { ResumeTab } from '@/components/profile/ResumeTab';
 import { PrivateInfoTab } from '@/components/profile/PrivateInfoTab';
 import { SalaryInfoTab } from '@/components/profile/SalaryInfoTab';
+import { SecurityTab } from '@/components/profile/SecurityTab';
 import { EMPLOYEES } from '@/lib/mock-data';
 
 export default function EmployeeProfile() {
@@ -47,13 +50,14 @@ export default function EmployeeProfile() {
             <ProfileTabs
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                tabs={['Resume', 'Private Info', 'Salary Info']}
+                tabs={['Resume', 'Private Info', 'Salary Info', 'Security']}
             />
 
             <div className="fade-in">
                 {activeTab === 'Resume' && <ResumeTab about={employee.about} skills={employee.skills} />}
                 {activeTab === 'Private Info' && <PrivateInfoTab details={employee.private} />}
                 {activeTab === 'Salary Info' && <SalaryInfoTab isAdmin={false} salary={employee.salary} />}
+                {activeTab === 'Security' && <SecurityTab />}
             </div>
 
             {activeTab === 'Private Info' && (
