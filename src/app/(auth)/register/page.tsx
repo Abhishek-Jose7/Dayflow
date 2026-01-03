@@ -23,7 +23,7 @@ export default function RegisterPage() {
         e.preventDefault();
         // Mock Registration
         setTimeout(() => {
-            router.push('/login');
+            router.push('/verify-email');
         }, 1000);
     };
 

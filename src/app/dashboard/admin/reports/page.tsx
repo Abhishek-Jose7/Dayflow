@@ -10,17 +10,46 @@ export default function AdminReports() {
         <div>
             <h1 style={{ fontSize: '1.75rem', marginBottom: '2rem' }}>Reports & Analytics</h1>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
-                <Card title="Attendance Overview">
-                    <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)', borderRadius: 'var(--radius-md)', color: 'var(--text-secondary)' }}>
-                        <BarChart2 size={48} />
-                        <span style={{ marginLeft: '1rem' }}>Attendance Chart Placeholder</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '2rem', marginBottom: '2rem' }}>
+                <Card title="Attendance Overview" interactive>
+                    <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', gap: '10px', paddingTop: '1rem' }}>
+                        {[60, 80, 45, 90, 75, 85, 95].map((val, i) => (
+                            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                                <div
+                                    style={{
+                                        width: '100%',
+                                        height: `${val}%`,
+                                        background: 'var(--primary)',
+                                        borderRadius: '4px',
+                                        opacity: 0.8,
+                                        transition: 'height 0.5s ease'
+                                    }}
+                                    className="hover-lift"
+                                />
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </Card>
                 <Card title="Leave Distribution">
-                    <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)', borderRadius: 'var(--radius-md)', color: 'var(--text-secondary)' }}>
-                        <PieChart size={48} />
-                        <span style={{ marginLeft: '1rem' }}>Leave Types Chart Placeholder</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1rem' }}>
+                        {[
+                            { label: 'Sick Leave', value: 30, color: 'var(--warning)' },
+                            { label: 'Paid Leave', value: 55, color: 'var(--success)' },
+                            { label: 'Unpaid Leave', value: 15, color: 'var(--danger)' },
+                        ].map((item) => (
+                            <div key={item.label}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '5px', fontWeight: 500 }}>
+                                    <span>{item.label}</span>
+                                    <span>{item.value}%</span>
+                                </div>
+                                <div style={{ width: '100%', height: '8px', background: 'var(--bg-app)', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ width: `${item.value}%`, height: '100%', background: item.color }} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </Card>
             </div>

@@ -68,26 +68,47 @@ export default function EmployeeProfile() {
 
             <div style={{ height: '2rem' }} />
 
-            <Card title="Employment Details">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                    <div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Joining Date</div>
-                        <div style={{ fontWeight: 500 }}>March 15, 2023</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1.5rem' }}>
+                <Card title="Employment Details">
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                        <div>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Joining Date</div>
+                            <div style={{ fontWeight: 500 }}>March 15, 2023</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Employment Type</div>
+                            <div style={{ fontWeight: 500 }}>Full-Time</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Work Location</div>
+                            <div style={{ fontWeight: 500 }}>Remote / HQ</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Manager</div>
+                            <div style={{ fontWeight: 500 }}>John Doe</div>
+                        </div>
                     </div>
-                    <div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Employment Type</div>
-                        <div style={{ fontWeight: 500 }}>Full-Time</div>
+                </Card>
+
+                <Card title="Documents">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {['Offer_Letter.pdf', 'Contract_Agreement.pdf', 'ID_Proof.jpg'].map((doc, i) => (
+                            <div key={i} style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                padding: '0.75rem', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)',
+                                background: 'var(--bg-app)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ width: 24, height: 24, background: '#F1F5F9', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>📄</div>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{doc}</span>
+                                </div>
+                                <button style={{ fontSize: '0.75rem', color: 'var(--primary)', border: 'none', background: 'none', cursor: 'pointer' }}>Download</button>
+                            </div>
+                        ))}
+                        <Button variant="outline" style={{ marginTop: '0.5rem', borderStyle: 'dashed' }}>+ Upload New Document</Button>
                     </div>
-                    <div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Work Location</div>
-                        <div style={{ fontWeight: 500 }}>Remote / HQ</div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Manager</div>
-                        <div style={{ fontWeight: 500 }}>John Doe</div>
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </div>
         </div>
     );
 }
