@@ -1,40 +1,23 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-// Force dynamic to avoid caching issues
-export const dynamic = 'force-dynamic';
-
-export async function GET(req: Request) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
     try {
-        const { searchParams } = new URL(req.url);
-        const email = searchParams.get('email');
-
-        if (!email) {
-            return NextResponse.json({ success: false, error: 'Email required' }, { status: 400 });
-        }
-
-        const user = await prisma.user.findUnique({
-            where: { email },
+        const { id } = params;
+        const p = await prisma.employeeProfile.findUnique({
+            where: { id },
             include: {
-                profile: {
-                    include: {
-                        department: true,
-                        salaryConfig: true
-                    }
-                }
+                user: true,
+                department: true,
+                salaryConfig: true
             }
         });
 
-        if (!user || !user.profile) {
-            return NextResponse.json({ success: false, error: 'Profile not found' }, { status: 404 });
+        if (!p) {
+            return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
         }
 
-        const p = user.profile;
-
-        // Transform DB data to UI Model
-        // We synthesize missing fields (Bank, DOB) deterministically for now
-        // since they aren't in the current schema prototype.
-
+        // Transformer logic (same as /api/employee/profile for consistency)
         const config = p.salaryConfig || {
             monthlyWage: 0,
             basicRate: 0.5,
@@ -59,19 +42,18 @@ export async function GET(req: Request) {
         const totalYear = wage * 12;
 
         const safeData = {
-            id: p.employeeId,
+            id: p.id,
+            employeeId: p.employeeId,
             name: `${p.firstName} ${p.lastName}`,
             role: p.designation,
             dept: p.department.name,
-            email: user.email,
+            email: p.user.email,
             phone: p.phone || '',
             manager: '-',
             location: p.address || '',
             joinDate: p.joinDate.toISOString().split('T')[0],
             about: p.about || '',
             skills: p.skills ? p.skills.split(',') : [],
-
-            // Expanded Private Info
             private: {
                 dob: '',
                 address: p.address || '',
@@ -81,7 +63,6 @@ export async function GET(req: Request) {
                 maritalStatus: '',
                 bankIndex: 0
             },
-
             salary: {
                 basic: basic.toLocaleString(),
                 hra: hra.toLocaleString(),
@@ -93,52 +74,60 @@ export async function GET(req: Request) {
                 profTax: config.professionalTax.toLocaleString(),
                 totalMonth: totalMonth.toLocaleString(),
                 totalYear: totalYear.toLocaleString(),
-                config: config // Pass raw config for editing if needed
+                config: config
             }
         };
 
         return NextResponse.json({ success: true, data: safeData });
 
     } catch (error) {
-        console.error('Profile API Error:', error);
+        console.error('Fetch Employee Error:', error);
         return NextResponse.json({ success: false, error: 'Server Error' }, { status: 500 });
     }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
     try {
+        const { id } = params;
         const body = await req.json();
-        const { email, about, skills } = body;
 
-        if (!email) {
-            return NextResponse.json({ success: false, error: 'Email required' }, { status: 400 });
+        // This endpoint is for ADMIN use to update core employment details
+        // Body can contain: designation, department, manager, phone, address, etc.
+
+        // Note: 'id' here from params is likely the 'employeeProfile.id' because that's what the URL uses (directory/[id])
+        // Let's verify valid fields to update
+
+        const updateData: any = {};
+        if (body.designation) updateData.designation = body.designation;
+        if (body.phone) updateData.phone = body.phone;
+        if (body.department) {
+            // Logic to connect/create department if needed, or just update the name if that's how we store it?
+            // Schema has Department relation.
+            // For prototype simplicity, assuming passed department is a name we connect to.
+            updateData.department = {
+                connectOrCreate: {
+                    where: { name: body.department },
+                    create: { name: body.department }
+                }
+            };
         }
 
-        const user = await prisma.user.findUnique({
-            where: { email },
-            include: { profile: true }
-        });
-
-        if (!user || !user.profile) {
-            return NextResponse.json({ success: false, error: 'User/Profile not found' }, { status: 404 });
+        // Find the profile first to ensure existence
+        const existing = await prisma.employeeProfile.findUnique({ where: { id } });
+        if (!existing) {
+            return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
         }
-
-        // Update bio and skills
-        // skills comes as array, join to string
-        const skillsString = Array.isArray(skills) ? skills.join(',') : skills;
 
         const updated = await prisma.employeeProfile.update({
-            where: { id: user.profile.id },
-            data: {
-                about,
-                skills: skillsString
-            }
+            where: { id },
+            data: updateData,
+            include: { department: true }
         });
 
         return NextResponse.json({ success: true, data: updated });
 
     } catch (error) {
-        console.error('Update Profile Error:', error);
-        return NextResponse.json({ success: false, error: 'Failed to update profile' }, { status: 500 });
+        console.error('Update Employee Error:', error);
+        return NextResponse.json({ success: false, error: 'Failed to update employee' }, { status: 500 });
     }
 }

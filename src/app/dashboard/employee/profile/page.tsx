@@ -44,7 +44,7 @@ export default function EmployeeProfile() {
             <ProfileHeader
                 name={employee.name}
                 role={employee.role}
-                employeeId={`EMP-${employee.id.padStart(3, '0')}`}
+                employeeId={employee.employeeId}
                 email={employee.email}
                 phone={employee.phone}
                 department={employee.dept}
@@ -60,9 +60,9 @@ export default function EmployeeProfile() {
             />
 
             <div className="fade-in">
-                {activeTab === 'Resume' && <ResumeTab about={employee.about} skills={employee.skills} />}
+                {activeTab === 'Resume' && <ResumeTab about={employee.about} skills={employee.skills} isEditable={true} />}
                 {activeTab === 'Private Info' && <PrivateInfoTab details={employee.private} />}
-                {activeTab === 'Salary Info' && <SalaryInfoTab isAdmin={false} salary={employee.salary} />}
+                {activeTab === 'Salary Info' && <SalaryInfoTab isAdmin={false} salary={employee.salary} employeeId={employee.id} />}
                 {activeTab === 'Security' && <SecurityTab />}
             </div>
 

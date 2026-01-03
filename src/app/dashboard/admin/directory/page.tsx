@@ -6,21 +6,25 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Search, Plus } from 'lucide-react';
 import Link from 'next/link';
-
 import { EMPLOYEES } from '@/lib/mock-data';
+import AddEmployeeDialog from '@/components/admin/AddEmployeeDialog';
 
 export default function AdminDirectory() {
-    const directory = EMPLOYEES;
+    const [showModal, setShowModal] = React.useState(false);
+
+    const directory = EMPLOYEES; // In a real app this would be fetched from the API
 
     return (
         <div>
+            {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '1.75rem' }}>Employee Directory</h1>
-                <Button style={{ display: 'flex', gap: '0.5rem' }}>
+                <Button onClick={() => setShowModal(true)} style={{ display: 'flex', gap: '0.5rem' }}>
                     <Plus size={16} /> Add Employee
                 </Button>
             </div>
 
+            {/* Search */}
             <div style={{ marginBottom: '2rem' }}>
                 <div style={{ position: 'relative', maxWidth: '400px' }}>
                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
@@ -28,11 +32,26 @@ export default function AdminDirectory() {
                 </div>
             </div>
 
+            {/* Employee cards grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                 {directory.map((emp) => (
                     <Card key={emp.id} padding="0">
                         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid var(--border-light)' }}>
-                            <div style={{ width: 80, height: 80, borderRadius: '50%', background: `linear-gradient(135deg, ${emp.profileColor}20 0%, ${emp.profileColor}40 100%)`, color: emp.profileColor, marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 600 }}>
+                            <div
+                                style={{
+                                    width: 80,
+                                    height: 80,
+                                    borderRadius: '50%',
+                                    background: `linear-gradient(135deg, ${emp.profileColor}20 0%, ${emp.profileColor}40 100%)`,
+                                    color: emp.profileColor,
+                                    marginBottom: '1rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.5rem',
+                                    fontWeight: 600,
+                                }}
+                            >
                                 {emp.name.charAt(0)}
                             </div>
                             <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{emp.name}</h3>
@@ -55,6 +74,9 @@ export default function AdminDirectory() {
                     </Card>
                 ))}
             </div>
+
+            {/* Independent Add Employee Dialog overlay */}
+            <AddEmployeeDialog show={showModal} onClose={() => setShowModal(false)} />
         </div>
     );
 }
