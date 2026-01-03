@@ -7,7 +7,7 @@ import { Clock, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function EmployeeDashboard() {
     const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    const [user, setUser] = React.useState<{ name: string } | null>(null);
+    const [user, setUser] = React.useState<{ name: string; email: string } | null>(null);
 
     React.useEffect(() => {
         const stored = localStorage.getItem('currentUser');
@@ -20,7 +20,12 @@ export default function EmployeeDashboard() {
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Hello, {user?.name.split(' ')[0] || 'Employee'}</h1>
+                    <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
+                        Hello, {user ? user.name.split(' ')[0] : '...'}
+                    </h1>
+                    <div style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'rgba(0,0,0,0.05)', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                        Logged in as: {user?.email}
+                    </div>
                     <p style={{ color: 'var(--text-secondary)' }}>It's {currentDate}. Have a productive day!</p>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>

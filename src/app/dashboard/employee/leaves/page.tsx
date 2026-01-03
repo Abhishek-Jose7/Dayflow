@@ -9,6 +9,74 @@ import { Calendar as CalendarIcon, Clock, CheckCircle, XCircle, AlertCircle } fr
 export default function EmployeeLeaves() {
     const [activeTab, setActiveTab] = useState<'apply' | 'history'>('apply');
 
+    const [leaves, setLeaves] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Form State
+    const [type, setType] = useState('Paid Leave');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [reason, setReason] = useState('');
+
+    React.useEffect(() => {
+        fetchLeaves(); // Load on mount
+    }, [activeTab]); // Reload when switching tabs
+
+    const fetchLeaves = async () => {
+        const stored = localStorage.getItem('currentUser');
+        if (stored) {
+            const user = JSON.parse(stored);
+            try {
+                const res = await fetch(`/api/leaves?email=${encodeURIComponent(user.email)}`);
+                const data = await res.json();
+                if (data.success) {
+                    setLeaves(data.data);
+                }
+            } catch (err) {
+                console.error('Failed to load leaves');
+            }
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const stored = localStorage.getItem('currentUser');
+        if (!stored) return;
+        const user = JSON.parse(stored);
+
+        try {
+            const res = await fetch('/api/leaves', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: user.email,
+                    type,
+                    startDate,
+                    endDate,
+                    reason
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert('Leave request submitted successfully!');
+                setReason('');
+                setStartDate('');
+                setEndDate('');
+                setActiveTab('history');
+                fetchLeaves();
+            } else {
+                alert('Failed to submit request');
+            }
+        } catch (err) {
+            alert('Error submitting request');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
@@ -45,14 +113,17 @@ export default function EmployeeLeaves() {
                 <div>
                     {activeTab === 'apply' ? (
                         <Card title="New Leave Request">
-                            <form>
+                            <form onSubmit={handleSubmit}>
                                 <div style={{ marginBottom: '1.5rem' }}>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Leave Type</label>
-                                    <select style={{
-                                        width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
-                                        border: '1px solid var(--border-light)', outline: 'none',
-                                        background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.95rem'
-                                    }}>
+                                    <select
+                                        value={type}
+                                        onChange={(e) => setType(e.target.value)}
+                                        style={{
+                                            width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
+                                            border: '1px solid var(--border-light)', outline: 'none',
+                                            background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.95rem'
+                                        }}>
                                         <option>Paid Leave</option>
                                         <option>Sick Leave</option>
                                         <option>Casual Leave</option>
@@ -61,46 +132,56 @@ export default function EmployeeLeaves() {
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                    <Input type="date" label="Start Date" />
-                                    <Input type="date" label="End Date" />
+                                    <Input type="date" label="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+                                    <Input type="date" label="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
                                 </div>
 
                                 <div style={{ marginBottom: '1.5rem' }}>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Reason / Remarks</label>
-                                    <textarea style={{
-                                        width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
-                                        border: '1px solid var(--border-light)', outline: 'none',
-                                        background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.95rem',
-                                        minHeight: '120px'
-                                    }} placeholder="Briefly describe the reason for your leave..."></textarea>
+                                    <textarea
+                                        value={reason}
+                                        onChange={(e) => setReason(e.target.value)}
+                                        style={{
+                                            width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)',
+                                            border: '1px solid var(--border-light)', outline: 'none',
+                                            background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.95rem',
+                                            minHeight: '120px'
+                                        }}
+                                        placeholder="Briefly describe the reason for your leave..."
+                                        required
+                                    ></textarea>
                                 </div>
 
                                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Button style={{ padding: '0.75rem 2rem' }}>Submit Request</Button>
+                                    <Button style={{ padding: '0.75rem 2rem' }} isLoading={isLoading}>Submit Request</Button>
                                 </div>
                             </form>
                         </Card>
                     ) : (
                         <Card title="Leave History">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {[
-                                    { type: 'Sick Leave', dates: 'Jan 4 - Jan 5, 2026', days: '2 Days', status: 'Pending', color: 'orange' },
-                                    { type: 'Paid Leave', dates: 'Dec 20 - Dec 24, 2025', days: '5 Days', status: 'Approved', color: 'green' },
-                                    { type: 'Casual Leave', dates: 'Nov 10, 2025', days: '1 Day', status: 'Rejected', color: 'red' },
-                                ].map((leave, i) => (
+                                {leaves.length === 0 && <div style={{ color: 'var(--text-secondary)' }}>No leave history found.</div>}
+                                {leaves.map((leave, i) => (
                                     <div key={i} style={{
                                         padding: '1rem', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                                     }}>
                                         <div>
                                             <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{leave.type}</div>
-                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{leave.dates} ({leave.days})</div>
+                                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                                {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
+                                            </div>
+                                            {leave.rejectionReason && (
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--danger)', marginTop: '0.25rem' }}>
+                                                    Reason: {leave.rejectionReason}
+                                                </div>
+                                            )}
                                         </div>
                                         <div style={{
                                             padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)',
                                             fontSize: '0.75rem', fontWeight: 600,
-                                            background: leave.status === 'Approved' ? '#DEF7EC' : leave.status === 'Rejected' ? '#FDE8E8' : '#FEF3C7',
-                                            color: leave.status === 'Approved' ? '#03543F' : leave.status === 'Rejected' ? '#9B1C1C' : '#92400E',
+                                            background: leave.status === 'APPROVED' ? '#DEF7EC' : leave.status === 'REJECTED' ? '#FDE8E8' : '#FEF3C7',
+                                            color: leave.status === 'APPROVED' ? '#03543F' : leave.status === 'REJECTED' ? '#9B1C1C' : '#92400E',
                                         }}>
                                             {leave.status}
                                         </div>

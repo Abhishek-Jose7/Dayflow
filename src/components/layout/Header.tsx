@@ -15,6 +15,20 @@ export function Header() {
 
     const title = currentSegment ? formatTitle(currentSegment) : 'Dashboard';
 
+    const [user, setUser] = React.useState<{ name: string; role: string } | null>(null);
+
+    React.useEffect(() => {
+        const stored = localStorage.getItem('currentUser');
+        if (stored) {
+            setUser(JSON.parse(stored));
+        }
+    }, []);
+
+    // Helper to get initials
+    const initials = user?.name
+        ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)
+        : 'U';
+
     return (
         <header style={{
             height: 'var(--header-height)',
@@ -67,11 +81,11 @@ export function Header() {
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                         <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 600 }}>
-                            JD
+                            {initials}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>John Doe</span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>HR Manager</span>
+                            <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{user?.name || 'User'}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user?.role || 'Guest'}</span>
                         </div>
                     </div>
                 </div>

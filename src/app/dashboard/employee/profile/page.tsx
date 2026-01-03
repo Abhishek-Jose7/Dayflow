@@ -12,23 +12,29 @@ import { EMPLOYEES } from '@/lib/mock-data';
 
 export default function EmployeeProfile() {
     const [activeTab, setActiveTab] = useState('Private Info');
-    const [employee, setEmployee] = useState<typeof EMPLOYEES[0] | null>(null);
+    const [employee, setEmployee] = useState<any | null>(null);
 
     useEffect(() => {
-        const stored = localStorage.getItem('currentUser');
-        if (stored) {
-            const user = JSON.parse(stored);
-            // In a real app, we'd fetch from API. Here we match the ID/Email from Mock Data
-            // user.id from login response is EMP-001 format or similar.
-            // Our mock data IDs are '1', '2'. 
-            // The Login API returns `id: user.profile?.employeeId` which is `EMP-001`.
-            // Let's strip 'EMP-' and parse int to find in mock data, or search by email.
+        const fetchProfile = async () => {
+            const stored = localStorage.getItem('currentUser');
+            if (stored) {
+                const user = JSON.parse(stored);
+                try {
+                    const res = await fetch(`/api/employee/profile?email=${encodeURIComponent(user.email)}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        setEmployee(data.data);
+                    } else {
+                        // Fallback logic could be logged here
+                        console.error(data.error);
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch profile");
+                }
+            }
+        };
 
-            const found = EMPLOYEES.find(e => e.email === user.email);
-            if (found) setEmployee(found);
-            // Fallback to Alex if not found (e.g. admin login viewing employee view?)
-            else if (EMPLOYEES[0]) setEmployee(EMPLOYEES[0]);
-        }
+        fetchProfile();
     }, []);
 
     if (!employee) return <div>Loading...</div>;

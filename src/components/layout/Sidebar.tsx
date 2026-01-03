@@ -94,8 +94,11 @@ export function Sidebar() {
 
             {/* Footer */}
             <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                <Link
-                    href="/login"
+                <div
+                    onClick={() => {
+                        localStorage.removeItem('currentUser');
+                        window.location.href = '/login';
+                    }}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -108,7 +111,7 @@ export function Sidebar() {
                 >
                     <LogOut size={16} />
                     Logout
-                </Link>
+                </div>
             </div>
         </div>
     );
