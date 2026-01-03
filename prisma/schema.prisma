@@ -101,6 +101,7 @@ model Attendance {
   checkOut    DateTime?
   status      String           // PRESENT, ABSENT, etc.
   workHours   Float?
+  extraHours  Float?           // Added for wireframe compliance
   
   createdAt   DateTime         @default(now())
 
