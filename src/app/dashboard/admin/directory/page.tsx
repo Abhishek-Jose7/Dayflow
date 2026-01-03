@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Search, Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AdminDirectory() {
     const directory = [
@@ -50,7 +51,9 @@ export default function AdminDirectory() {
                                 <span style={{ color: 'var(--text-secondary)' }}>Phone</span>
                                 <span style={{ fontWeight: 500 }}>{emp.phone}</span>
                             </div>
-                            <Button variant="outline" fullWidth style={{ marginTop: '1rem', fontSize: '0.875rem' }}>View Profile</Button>
+                            <Link href={`/dashboard/admin/directory/${emp.id}`} style={{ display: 'block', marginTop: '1rem' }}>
+                                <Button variant="outline" fullWidth style={{ fontSize: '0.875rem', cursor: 'pointer' }}>View Profile</Button>
+                            </Link>
                         </div>
                     </Card>
                 ))}

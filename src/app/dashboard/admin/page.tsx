@@ -3,14 +3,9 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { StatsCard } from '@/components/dashboard/StatsCard'; // Modular Component
 import { Users, Clock, Calendar, AlertCircle } from 'lucide-react';
 
-const stats = [
-    { label: 'Total Employees', value: '124', icon: Users, color: '#3B82F6' },
-    { label: 'Present Today', value: '108', icon: Clock, color: '#10B981', sub: '92% Attendance' },
-    { label: 'Leave Requests', value: '12', icon: AlertCircle, color: '#F59E0B', sub: '4 Pending' },
-    { label: 'Upcoming Reviews', value: '5', icon: Calendar, color: '#8B5CF6' },
-];
 
 export default function AdminDashboard() {
     return (
@@ -20,33 +15,22 @@ export default function AdminDashboard() {
                 <p style={{ color: 'var(--text-secondary)' }}>Here's what's happening at Dayflow today.</p>
             </div>
 
-            {/* Stats Grid */}
+            {/* Stats Grid - Modularized */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                {stats.map((stat) => {
-                    const Icon = stat.icon;
-                    return (
-                        <Card key={stat.label} padding="1.5rem">
-                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                <div style={{
-                                    width: '40px', height: '40px',
-                                    borderRadius: 'var(--radius-md)',
-                                    background: `${stat.color}20`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    color: stat.color
-                                }}>
-                                    <Icon size={20} />
-                                </div>
-                                {stat.sub && (
-                                    <span style={{ fontSize: '0.75rem', background: 'var(--bg-app)', padding: '2px 6px', borderRadius: '4px', color: 'var(--text-secondary)' }}>
-                                        {stat.sub}
-                                    </span>
-                                )}
-                            </div>
-                            <div style={{ fontSize: '2rem', fontWeight: 600, marginBottom: '0.25rem' }}>{stat.value}</div>
-                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{stat.label}</div>
-                        </Card>
-                    )
-                })}
+                <StatsCard
+                    label="Total Employees" value="124" icon={Users} color="#3B82F6"
+                />
+                <StatsCard
+                    label="Present Today" value="108" icon={Clock} color="#10B981"
+                    subText="92% Attendance" trend="positive"
+                />
+                <StatsCard
+                    label="Pending Leaves" value="12" icon={AlertCircle} color="#F59E0B"
+                    subText="4 Critical" trend="neutral"
+                />
+                <StatsCard
+                    label="Upcoming Reviews" value="5" icon={Calendar} color="#8B5CF6"
+                />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>

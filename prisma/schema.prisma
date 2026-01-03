@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  role          String    @default("EMPLOYEE") // ADMIN, HR, EMPLOYEE
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       EmployeeProfile?
+  auditLogs     AuditLog[]
+}
+
+model EmployeeProfile {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  
+  firstName     String
+  lastName      String
+  photoUrl      String?
+  phone         String?
+  address       String?
+  
+  employeeId    String    @unique
+  departmentId  String
+  department    Department @relation(fields: [departmentId], references: [id])
+  designation   String
+  joinDate      DateTime
+  
+  attendance    Attendance[]
+  leaves        LeaveRequest[]
+  payroll       Payroll[]
+  documents     Document[]
+  
+  managerId     String?
+  manager       EmployeeProfile? @relation("ManagerScale", fields: [managerId], references: [id])
+  directReports EmployeeProfile[] @relation("ManagerScale")
+}
+
+model Department {
+  id          String            @id @default(uuid())
+  name        String            @unique
+  employees   EmployeeProfile[]
+}
+
+model Attendance {
+  id          String           @id @default(uuid())
+  employeeId  String
+  employee    EmployeeProfile  @relation(fields: [employeeId], references: [id])
+  date        DateTime
+  checkIn     DateTime?
+  checkOut    DateTime?
+  status      String           // PRESENT, ABSENT, etc.
+  workHours   Float?
+  
+  createdAt   DateTime         @default(now())
+
+  @@index([employeeId, date])
+}
+
+model LeaveRequest {
+  id          String           @id @default(uuid())
+  employeeId  String
+  employee    EmployeeProfile  @relation(fields: [employeeId], references: [id])
+  
+  type        String           // PAID, SICK, etc.
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  
+  status      String           @default("PENDING")
+  approvedBy  String?
+  rejectionReason String?
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now())
+}
+
+model Payroll {
+  id          String           @id @default(uuid())
+  employeeId  String
+  employee    EmployeeProfile  @relation(fields: [employeeId], references: [id])
+  
+  month       Int
+  year        Int
+  
+  basicSalary Decimal
+  allowances  Decimal
+  deductions  Decimal
+  netSalary   Decimal
+  
+  status      String           @default("DRAFT")
+  generatedAt DateTime         @default(now())
+
+  @@unique([employeeId, month, year])
+}
+
+model Document {
+  id          String           @id @default(uuid())
+  employeeId  String
+  employee    EmployeeProfile  @relation(fields: [employeeId], references: [id])
+  name        String
+  url         String
+  type        String
+  uploadedAt  DateTime         @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  resource  String
+  ipAddress String?
+  timestamp DateTime @default(now())
+}
