@@ -1,114 +1,67 @@
-'use client';
-
-import React from 'react';
-import { Card } from '@/components/ui/Card';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Camera } from 'lucide-react';
+import { ProfileHeader } from '@/components/profile/ProfileHeader';
+import { ProfileTabs } from '@/components/profile/ProfileTabs';
+import { ResumeTab } from '@/components/profile/ResumeTab';
+import { PrivateInfoTab } from '@/components/profile/PrivateInfoTab';
+import { SalaryInfoTab } from '@/components/profile/SalaryInfoTab';
+import { EMPLOYEES } from '@/lib/mock-data';
 
 export default function EmployeeProfile() {
+    const [activeTab, setActiveTab] = useState('Private Info');
+    const [employee, setEmployee] = useState<typeof EMPLOYEES[0] | null>(null);
+
+    useEffect(() => {
+        const stored = localStorage.getItem('currentUser');
+        if (stored) {
+            const user = JSON.parse(stored);
+            // In a real app, we'd fetch from API. Here we match the ID/Email from Mock Data
+            // user.id from login response is EMP-001 format or similar.
+            // Our mock data IDs are '1', '2'. 
+            // The Login API returns `id: user.profile?.employeeId` which is `EMP-001`.
+            // Let's strip 'EMP-' and parse int to find in mock data, or search by email.
+
+            const found = EMPLOYEES.find(e => e.email === user.email);
+            if (found) setEmployee(found);
+            // Fallback to Alex if not found (e.g. admin login viewing employee view?)
+            else if (EMPLOYEES[0]) setEmployee(EMPLOYEES[0]);
+        }
+    }, []);
+
+    if (!employee) return <div>Loading...</div>;
+
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '1.75rem', marginBottom: '1.5rem' }}>My Profile</h1>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
+            <ProfileHeader
+                name={employee.name}
+                role={employee.role}
+                employeeId={`EMP-${employee.id.padStart(3, '0')}`}
+                email={employee.email}
+                phone={employee.phone}
+                department={employee.dept}
+                manager={employee.manager}
+                location={employee.location}
+                isEditable={true}
+            />
 
-            <Card>
-                <div style={{ display: 'flex', gap: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-light)', marginBottom: '2rem' }}>
-                    <div style={{ position: 'relative' }}>
-                        <div style={{
-                            width: 120, height: 120,
-                            borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '2.5rem', fontWeight: 600, color: 'var(--primary)'
-                        }}>
-                            AL
-                        </div>
-                        <button style={{
-                            position: 'absolute', bottom: 0, right: 0,
-                            background: 'var(--primary)', color: 'white',
-                            width: 32, height: 32, borderRadius: '50%', border: '2px solid white',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            cursor: 'pointer'
-                        }}>
-                            <Camera size={16} />
-                        </button>
-                    </div>
+            <ProfileTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                tabs={['Resume', 'Private Info', 'Salary Info']}
+            />
 
-                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <h2 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>Alex Lewis</h2>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', fontWeight: 500 }}>Senior Software Engineer</div>
-                        <div style={{
-                            display: 'inline-block',
-                            background: 'var(--bg-app)',
-                            padding: '0.25rem 0.75rem',
-                            borderRadius: 'var(--radius-full)',
-                            fontSize: '0.875rem',
-                            color: 'var(--text-secondary)'
-                        }}>
-                            EMP-2024-042
-                        </div>
-                    </div>
-                </div>
+            <div className="fade-in">
+                {activeTab === 'Resume' && <ResumeTab about={employee.about} skills={employee.skills} />}
+                {activeTab === 'Private Info' && <PrivateInfoTab details={employee.private} />}
+                {activeTab === 'Salary Info' && <SalaryInfoTab isAdmin={false} salary={employee.salary} />}
+            </div>
 
-                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Personal Information</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                    <Input label="Full Name" value="Alex Lewis" disabled />
-                    <Input label="Email Address" value="alex.lewis@dayflow.com" disabled />
-                    <Input label="Phone Number" defaultValue="+1 (555) 123-4567" />
-                    <Input label="Current Address" defaultValue="123 Tech Park, Silicon Valley, CA" />
-                    <Input label="Department" value="Engineering" disabled />
-                    <Input label="Role" value="Senior Engineer" disabled />
-                </div>
-
+            {activeTab === 'Private Info' && (
                 <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                     <Button variant="outline">Cancel</Button>
                     <Button>Save Changes</Button>
                 </div>
-            </Card>
-
-            <div style={{ height: '2rem' }} />
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1.5rem' }}>
-                <Card title="Employment Details">
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                        <div>
-                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Joining Date</div>
-                            <div style={{ fontWeight: 500 }}>March 15, 2023</div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Employment Type</div>
-                            <div style={{ fontWeight: 500 }}>Full-Time</div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Work Location</div>
-                            <div style={{ fontWeight: 500 }}>Remote / HQ</div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Manager</div>
-                            <div style={{ fontWeight: 500 }}>John Doe</div>
-                        </div>
-                    </div>
-                </Card>
-
-                <Card title="Documents">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {['Offer_Letter.pdf', 'Contract_Agreement.pdf', 'ID_Proof.jpg'].map((doc, i) => (
-                            <div key={i} style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                padding: '0.75rem', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)',
-                                background: 'var(--bg-app)'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <div style={{ width: 24, height: 24, background: '#F1F5F9', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>📄</div>
-                                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{doc}</span>
-                                </div>
-                                <button style={{ fontSize: '0.75rem', color: 'var(--primary)', border: 'none', background: 'none', cursor: 'pointer' }}>Download</button>
-                            </div>
-                        ))}
-                        <Button variant="outline" style={{ marginTop: '0.5rem', borderStyle: 'dashed' }}>+ Upload New Document</Button>
-                    </div>
-                </Card>
-            </div>
+            )}
         </div>
     );
 }

@@ -7,13 +7,10 @@ import { Input } from '@/components/ui/Input';
 import { Search, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+import { EMPLOYEES } from '@/lib/mock-data';
+
 export default function AdminDirectory() {
-    const directory = [
-        { id: 1, name: 'Alex Lewis', role: 'Senior Engineer', dept: 'Engineering', email: 'alex@dayflow.com', phone: '+1 555-0101' },
-        { id: 2, name: 'Sarah Wilson', role: 'Product Manager', dept: 'Product', email: 'sarah@dayflow.com', phone: '+1 555-0102' },
-        { id: 3, name: 'John Doe', role: 'HR Manager', dept: 'Human Resources', email: 'john@dayflow.com', phone: '+1 555-0103' },
-        { id: 4, name: 'Mike Chen', role: 'UI/UX Designer', dept: 'Design', email: 'mike@dayflow.com', phone: '+1 555-0104' },
-    ];
+    const directory = EMPLOYEES;
 
     return (
         <div>
@@ -35,7 +32,7 @@ export default function AdminDirectory() {
                 {directory.map((emp) => (
                     <Card key={emp.id} padding="0">
                         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', borderBottom: '1px solid var(--border-light)' }}>
-                            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--bg-app)', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 600, color: 'var(--primary)' }}>
+                            <div style={{ width: 80, height: 80, borderRadius: '50%', background: `linear-gradient(135deg, ${emp.profileColor}20 0%, ${emp.profileColor}40 100%)`, color: emp.profileColor, marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 600 }}>
                                 {emp.name.charAt(0)}
                             </div>
                             <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{emp.name}</h3>

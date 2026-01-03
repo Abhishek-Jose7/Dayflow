@@ -13,23 +13,38 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
-        // Mock Login Logic
-        setTimeout(() => {
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
             setIsLoading(false);
-            if (email === 'admin@dayflow.com' && password === 'admin') {
-                router.push('/dashboard/admin');
-            } else if (email && password) {
-                // Default to employee
-                router.push('/dashboard/employee');
+
+            if (data.success) {
+                // Store Session
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+                // Redirect based on Role
+                if (data.user.role === 'ADMIN') {
+                    router.push('/dashboard/admin');
+                } else {
+                    router.push('/dashboard/employee');
+                }
             } else {
-                setError('Invalid credentials');
+                setError(data.error || 'Login failed');
             }
-        }, 1000);
+        } catch (err) {
+            setIsLoading(false);
+            setError('Something went wrong. Please try again.');
+        }
     };
 
     return (
